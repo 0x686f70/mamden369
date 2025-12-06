@@ -1,4 +1,4 @@
-const CACHE_NAME = 'score-app-v1';
+const CACHE_NAME = 'score-app-v2';
 const urlsToCache = [
     './',
     './index.html',
