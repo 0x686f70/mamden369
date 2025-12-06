@@ -708,17 +708,16 @@ function renderPlayers() {
                             <button class="billiard-ball ball-3" onclick="billiardBallClick(${player.id}, 1, event)" title="1 điểm" type="button"></button>
                             <button class="billiard-ball ball-6" onclick="billiardBallClick(${player.id}, 2, event)" title="2 điểm" type="button"></button>
                             <button class="billiard-ball ball-9" onclick="billiardBallClick(${player.id}, 3, event)" title="3 điểm" type="button"></button>
+                            <button class="billiard-ball ball-cham" onclick="diCham(${player.id}, event)" title="Đi chấm" type="button">🎯</button>
                         </div>
                     </div>
                 </div>
                 <div class="player-card-menu">
                     <button class="menu-btn menu-edit" onclick="editPlayerName(${player.id})">
                         <i data-lucide="edit-2"></i>
-                        <span>Đổi tên</span>
                     </button>
                     <button class="menu-btn menu-delete" onclick="deletePlayer(${player.id}, event)">
                         <i data-lucide="trash-2"></i>
-                        <span>Xóa</span>
                     </button>
                 </div>
             </div>
