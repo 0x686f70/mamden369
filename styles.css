@@ -360,37 +360,65 @@ body {
 /* Players Section */
 .players-section {
     flex: 1;
-    padding: 16px;
+    padding: 12px;
     padding-bottom: calc(80px + var(--safe-area-bottom));
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .players-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 /* Player Card - New Design */
 .player-card-wrapper {
     position: relative;
     overflow: hidden;
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .player-card {
     background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
-    padding: 16px 20px;
+    border-radius: 16px;
+    padding: 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     position: relative;
-    min-height: 100px;
+    min-height: 85px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
     touch-action: pan-y;
     z-index: 2;
+}
+
+/* Scale down for 4+ players */
+.players-list:has(.player-card-wrapper:nth-child(4)) .player-card {
+    padding: 10px 14px;
+    min-height: 75px;
+}
+
+.players-list:has(.player-card-wrapper:nth-child(4)) .player-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+}
+
+.players-list:has(.player-card-wrapper:nth-child(4)) .player-name {
+    font-size: 18px !important;
+}
+
+.players-list:has(.player-card-wrapper:nth-child(4)) .player-score-large {
+    font-size: 36px !important;
+}
+
+.players-list:has(.player-card-wrapper:nth-child(4)) .billiard-ball {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
 }
 
 .player-card-wrapper:nth-child(even) .player-card {
@@ -400,17 +428,17 @@ body {
 .player-card-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .player-avatar {
-    width: 48px;
-    height: 48px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -420,32 +448,32 @@ body {
 }
 
 .player-name {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--text-dark);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    min-width: 60px;
-    max-width: 200px;
+    min-width: 50px;
+    max-width: 180px;
 }
 
 .player-card-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
 }
 
 .player-score-large {
-    font-size: 48px;
+    font-size: 42px;
     font-weight: 800;
     color: var(--text-dark);
     line-height: 1;
     transition: opacity 0.2s;
     text-align: center;
     flex: 1;
-    min-width: 80px;
+    min-width: 70px;
 }
 
 .player-score-large:hover {
@@ -459,18 +487,18 @@ body {
 .billiard-balls-container {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px;
+    gap: 8px;
+    padding: 4px;
     position: relative;
     z-index: 10;
     flex-shrink: 0;
 }
 
 .billiard-ball {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
-    min-height: 50px;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
     border-radius: 50%;
     border: none;
     display: flex;
@@ -501,7 +529,8 @@ body {
 }
 
 .ball-number {
-    display: none; /* Ẩn số vì đã có trong hình ảnh */
+    display: none;
+    /* Ẩn số vì đã có trong hình ảnh */
 }
 
 /* Bi số 3 - dùng hình ảnh PNG */
@@ -541,6 +570,7 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -560,6 +590,7 @@ body {
         transform: translateY(20px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -739,8 +770,8 @@ body {
 
 /* Bottom Navigation */
 .bottom-nav {
-    position: fixed;
-    bottom: 0;
+    position: fixed !important;
+    bottom: 0 !important;
     left: 0;
     right: 0;
     background: var(--bg-darker);
@@ -752,6 +783,8 @@ body {
     max-width: 500px;
     margin: 0 auto;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 1000 !important;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .nav-btn {

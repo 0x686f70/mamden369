@@ -12,6 +12,8 @@
     <link rel="manifest" href="manifest.json">
     <title>MamDen</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile-responsive.css">
+    <link rel="stylesheet" href="avatar-selector.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -120,11 +122,29 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span><i data-lucide="target"
+                                    style="width: 16px; height: 16px; vertical-align: middle; margin-right: 6px;"></i>
+                                Mâm đền 369</span>
+                            <label class="switch" style="margin: 0;">
+                                <input type="checkbox" id="new-game-mode-369">
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin: 0;">Cộng điểm 1 người = Trừ
+                            điểm người khác</p>
+                    </div>
+                    <div class="form-group">
                         <label>Thêm người chơi</label>
                         <div class="players-input-list" id="players-input-list">
                             <div class="player-input-item">
                                 <input type="text" placeholder="Tên người chơi 1" class="player-name-field"
                                     maxlength="20">
+                                <button type="button" class="player-avatar-btn" onclick="selectPlayerAvatar(this, 0)"
+                                    title="Chọn icon">
+                                    <span class="avatar-preview">👨</span>
+                                </button>
                                 <button class="remove-player-input" onclick="removePlayerInput(this)">
                                     <i data-lucide="x"></i>
                                 </button>
@@ -132,6 +152,10 @@
                             <div class="player-input-item">
                                 <input type="text" placeholder="Tên người chơi 2" class="player-name-field"
                                     maxlength="20">
+                                <button type="button" class="player-avatar-btn" onclick="selectPlayerAvatar(this, 1)"
+                                    title="Chọn icon">
+                                    <span class="avatar-preview">👩</span>
+                                </button>
                                 <button class="remove-player-input" onclick="removePlayerInput(this)">
                                     <i data-lucide="x"></i>
                                 </button>
@@ -146,6 +170,24 @@
                     <button class="btn-cancel" onclick="closeNewGameModal()">Hủy</button>
                     <button class="btn-confirm" onclick="confirmNewGame()">
                         <i data-lucide="play"></i> Bắt đầu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Avatar Selector Modal -->
+        <div id="avatar-selector-modal" class="modal hidden">
+            <div class="modal-content" style="max-width: 280px;">
+                <div class="modal-header">
+                    <h3><i data-lucide="smile" class="modal-icon"></i> Chọn Icon</h3>
+                    <button class="close-btn" onclick="closeAvatarSelector()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="avatar-grid" id="avatar-selector-grid"></div>
+                <div class="modal-actions single">
+                    <button class="btn-confirm full-width" onclick="closeAvatarSelector()">
+                        <i data-lucide="check"></i> Xong
                     </button>
                 </div>
             </div>
@@ -240,6 +282,12 @@
                     </button>
                 </div>
                 <input type="text" id="player-name-input" placeholder="Tên người chơi" maxlength="20">
+                <div class="avatar-selector">
+                    <label
+                        style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; display: block;">Chọn
+                        icon</label>
+                    <div class="avatar-grid" id="add-player-avatar-grid"></div>
+                </div>
                 <div class="modal-actions">
                     <button class="btn-cancel" onclick="closeAddPlayerModal()">Hủy</button>
                     <button class="btn-confirm" onclick="confirmAddPlayer()">
@@ -259,6 +307,12 @@
                     </button>
                 </div>
                 <input type="text" id="edit-player-name-input" placeholder="Tên người chơi" maxlength="20">
+                <div class="avatar-selector">
+                    <label
+                        style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; display: block;">Chọn
+                        icon</label>
+                    <div class="avatar-grid" id="edit-avatar-grid"></div>
+                </div>
                 <div class="modal-actions">
                     <button class="btn-cancel" onclick="closeEditPlayerModal()">Hủy</button>
                     <button class="btn-confirm" onclick="confirmEditPlayerName()">
@@ -327,6 +381,7 @@
     </div>
 
     <script src="app.js"></script>
+    <script src="avatar-helper.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();

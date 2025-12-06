@@ -9,6 +9,10 @@ let currentPlayerId = null;
 let selectedOpponentId = null; // For 369 mode with 3+ players
 let lastOpponentId = {}; // Store last opponent for each player (for quick adjust)
 let editingPlayerId = null; // For editing player name
+let selectedAvatar = null; // For avatar selection
+let playerAvatars = []; // Track avatars for new game form
+let currentAvatarButtonIndex = null; // Track which button is being edited
+
 
 // Avatar colors
 const avatarColors = [
@@ -28,6 +32,36 @@ function refreshIcons() {
         lucide.createIcons();
     }
 }
+
+// Render avatar selection grid
+function renderAvatarGrid(containerId, currentAvatar) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+    avatarImages.forEach(avatar => {
+        const btn = document.createElement('button');
+        btn.className = 'avatar-option';
+        btn.textContent = avatar;
+        btn.type = 'button';
+
+        if (avatar === currentAvatar) {
+            btn.classList.add('selected');
+        }
+
+        btn.onclick = () => {
+            // Remove selected from all
+            container.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('selected'));
+            // Add selected to clicked
+            btn.classList.add('selected');
+            // Store selected avatar
+            selectedAvatar = avatar;
+        };
+
+        container.appendChild(btn);
+    });
+}
+
 
 // ==================== TOAST NOTIFICATIONS ====================
 function showToast(message, type = 'info', duration = 3000) {
@@ -247,15 +281,24 @@ function startNewGame() {
     const gameName = `MamDen ${day}/${month}/${year}`;
     document.getElementById('game-name-input').value = gameName;
 
+    // Initialize player avatars
+    playerAvatars = [avatarImages[0], avatarImages[1]];
+
     // Reset player inputs
     const container = document.getElementById('players-input-list');
     container.innerHTML = `
         <div class="player-input-item">
             <input type="text" placeholder="Tên người chơi 1" class="player-name-field" maxlength="20">
+            <button type="button" class="player-avatar-btn" onclick="selectPlayerAvatar(this, 0)" title="Chọn icon">
+                <span class="avatar-preview">${playerAvatars[0]}</span>
+            </button>
             <button class="remove-player-input" onclick="removePlayerInput(this)"><i data-lucide="x"></i></button>
         </div>
         <div class="player-input-item">
             <input type="text" placeholder="Tên người chơi 2" class="player-name-field" maxlength="20">
+            <button type="button" class="player-avatar-btn" onclick="selectPlayerAvatar(this, 1)" title="Chọn icon">
+                <span class="avatar-preview">${playerAvatars[1]}</span>
+            </button>
             <button class="remove-player-input" onclick="removePlayerInput(this)"><i data-lucide="x"></i></button>
         </div>
     `;
@@ -263,7 +306,7 @@ function startNewGame() {
 
     // Reset win options
     document.querySelectorAll('.win-option').forEach(btn => btn.classList.remove('active'));
-    document.querySelector('.win-option[data-points="100"]').classList.add('active');
+    document.querySelector('.win-option[data-points="50"]').classList.add('active');
 }
 
 function closeNewGameModal() {
@@ -273,10 +316,16 @@ function closeNewGameModal() {
 function addPlayerInput() {
     const container = document.getElementById('players-input-list');
     const count = container.children.length + 1;
+    const avatarIndex = count - 1;
+    playerAvatars[avatarIndex] = avatarImages[avatarIndex % avatarImages.length];
+
     const div = document.createElement('div');
     div.className = 'player-input-item';
     div.innerHTML = `
         <input type="text" placeholder="Tên người chơi ${count}" class="player-name-field" maxlength="20">
+        <button type="button" class="player-avatar-btn" onclick="selectPlayerAvatar(this, ${avatarIndex})" title="Chọn icon">
+            <span class="avatar-preview">${playerAvatars[avatarIndex]}</span>
+        </button>
         <button class="remove-player-input" onclick="removePlayerInput(this)"><i data-lucide="x"></i></button>
     `;
     container.appendChild(div);
@@ -306,6 +355,9 @@ function confirmNewGame() {
     const activeWinOption = document.querySelector('.win-option.active');
     winPoints = parseInt(activeWinOption?.dataset.points || 100);
 
+    // Get mode 369 setting
+    const newGameMode369 = document.getElementById('new-game-mode-369').checked;
+
     // Get player names
     const playerInputs = document.querySelectorAll('.player-name-field');
     const playerNames = [];
@@ -328,11 +380,11 @@ function confirmNewGame() {
             name: name,
             score: 0,
             color: avatarColors[index % avatarColors.length],
-            avatar: avatarImages[index % avatarImages.length]
+            avatar: playerAvatars[index] || avatarImages[index % avatarImages.length]
         })),
         history: [],
         winPoints: winPoints,
-        mode369: false,
+        mode369: newGameMode369,
         createdAt: Date.now(),
         lastModified: Date.now()
     };
@@ -428,6 +480,9 @@ function closeGameListModal() {
 function addPlayer() {
     document.getElementById('add-player-modal').classList.remove('hidden');
     document.getElementById('player-name-input').value = '';
+    // Select first avatar as default
+    selectedAvatar = avatarImages[players.length % avatarImages.length];
+    renderAvatarGrid('add-player-avatar-grid', selectedAvatar);
     document.getElementById('player-name-input').focus();
 }
 
@@ -447,7 +502,7 @@ function confirmAddPlayer() {
         name: name,
         score: 0,
         color: avatarColors[players.length % avatarColors.length],
-        avatar: avatarImages[players.length % avatarImages.length]
+        avatar: selectedAvatar || avatarImages[players.length % avatarImages.length]
     };
 
     players.push(player);
@@ -456,7 +511,7 @@ function confirmAddPlayer() {
     updateLeaderDisplay();
     closeAddPlayerModal();
 
-    addToHistory(`Thêm người chơi: ${name}`, 0);
+    addToHistory(`Thêm người chơi: ${name} ${player.avatar}`, 0);
 }
 
 function deletePlayer(id, event) {
@@ -481,9 +536,11 @@ function editPlayerName(id) {
     closePlayerMenu();
     const player = players.find(p => p.id === id);
     if (!player) return;
-    
+
     editingPlayerId = id;
+    selectedAvatar = player.avatar; // Store current avatar
     document.getElementById('edit-player-name-input').value = player.name;
+    renderAvatarGrid('edit-avatar-grid', player.avatar);
     document.getElementById('edit-player-modal').classList.remove('hidden');
     document.getElementById('edit-player-name-input').focus();
     document.getElementById('edit-player-name-input').select();
@@ -500,22 +557,44 @@ function confirmEditPlayerName() {
         showToast('Vui lòng nhập tên người chơi', 'warning');
         return;
     }
-    
+
     const player = players.find(p => p.id === editingPlayerId);
     if (!player) return;
-    
-    if (newName === player.name) {
+
+    const oldName = player.name;
+    const oldAvatar = player.avatar;
+    let changed = false;
+
+    if (newName !== player.name) {
+        player.name = newName;
+        changed = true;
+    }
+
+    if (selectedAvatar && selectedAvatar !== oldAvatar) {
+        player.avatar = selectedAvatar;
+        changed = true;
+    }
+
+    if (!changed) {
         closeEditPlayerModal();
         return;
     }
-    
-    const oldName = player.name;
-    player.name = newName;
+
     saveCurrentGame();
     renderPlayers();
     updateLeaderDisplay();
-    addToHistory(`Đổi tên: ${oldName} → ${player.name}`, 0);
-    showToast(`Đã đổi tên thành ${player.name}`, 'success');
+
+    if (newName !== oldName && selectedAvatar !== oldAvatar) {
+        addToHistory(`Đổi: ${oldName} → ${player.name} ${selectedAvatar}`, 0);
+        showToast(`Đã đổi tên & icon`, 'success');
+    } else if (newName !== oldName) {
+        addToHistory(`Đổi tên: ${oldName} → ${player.name}`, 0);
+        showToast(`Đã đổi tên thành ${player.name}`, 'success');
+    } else {
+        addToHistory(`Đổi icon: ${player.name} ${selectedAvatar}`, 0);
+        showToast(`Đã đổi icon`, 'success');
+    }
+
     closeEditPlayerModal();
 }
 
@@ -527,30 +606,30 @@ function setupSwipeGestures() {
         let isDragging = false;
         const card = wrapper.querySelector('.player-card');
         const menu = wrapper.querySelector('.player-card-menu');
-        
+
         const handleStart = (e) => {
             const touch = e.touches ? e.touches[0] : e;
             startX = touch.clientX;
             isDragging = true;
             card.style.transition = 'none';
         };
-        
+
         const handleMove = (e) => {
             if (!isDragging) return;
             const touch = e.touches ? e.touches[0] : e;
             currentX = touch.clientX - startX;
-            
+
             // Chỉ cho phép swipe sang trái (giá trị âm)
             if (currentX < 0) {
                 card.style.transform = `translateX(${currentX}px)`;
             }
         };
-        
+
         const handleEnd = () => {
             if (!isDragging) return;
             isDragging = false;
             card.style.transition = 'transform 0.3s ease';
-            
+
             // Nếu swipe quá 80px sang trái, mở menu
             if (currentX < -80) {
                 card.style.transform = 'translateX(-120px)';
@@ -562,12 +641,12 @@ function setupSwipeGestures() {
             }
             currentX = 0;
         };
-        
+
         // Touch events
         card.addEventListener('touchstart', handleStart, { passive: true });
         card.addEventListener('touchmove', handleMove, { passive: true });
         card.addEventListener('touchend', handleEnd);
-        
+
         // Mouse events for desktop testing
         card.addEventListener('mousedown', handleStart);
         card.addEventListener('mousemove', handleMove);
@@ -654,7 +733,7 @@ function billiardBallClick(playerId, points, event) {
         event.stopPropagation();
         event.preventDefault();
     }
-    
+
     // If mode 369 with 3+ players, show quick opponent selector
     if (mode369 && players.length > 2) {
         showQuickOpponentSelector(playerId, points);
@@ -667,7 +746,7 @@ function billiardBallClick(playerId, points, event) {
 function showQuickOpponentSelector(playerId, amount) {
     const player = players.find(p => p.id === playerId);
     if (!player) return;
-    
+
     // Create quick selector modal
     const modal = document.createElement('div');
     modal.className = 'quick-selector-modal';
@@ -687,17 +766,17 @@ function showQuickOpponentSelector(playerId, amount) {
             </button>
         </div>
     `;
-    
+
     const list = modal.querySelector('.quick-selector-list');
     const allBtn = modal.querySelector('#quick-selector-all-btn');
     const opponents = players.filter(p => p.id !== playerId);
-    
+
     // Setup "Tất cả đền" button
     allBtn.onclick = () => {
         applyScoreChange(playerId, amount, 'all');
         modal.remove();
     };
-    
+
     opponents.forEach(p => {
         const btn = document.createElement('button');
         btn.className = 'quick-selector-btn';
@@ -711,17 +790,17 @@ function showQuickOpponentSelector(playerId, amount) {
         };
         list.appendChild(btn);
     });
-    
+
     document.body.appendChild(modal);
     refreshIcons();
-    
+
     // Auto close after 5 seconds or click outside
     setTimeout(() => {
         if (document.body.contains(modal)) {
             modal.remove();
         }
     }, 5000);
-    
+
     modal.onclick = (e) => {
         if (e.target === modal) {
             modal.remove();
@@ -732,7 +811,7 @@ function showQuickOpponentSelector(playerId, amount) {
 function applyScoreChange(playerId, amount, opponentId) {
     const player = players.find(p => p.id === playerId);
     if (!player) return;
-    
+
     if (mode369 && players.length > 1) {
         if (players.length === 2) {
             // 2 players: Auto-select the other player
@@ -741,7 +820,7 @@ function applyScoreChange(playerId, amount, opponentId) {
                 player.score += amount;
                 otherPlayer.score -= amount;
                 otherPlayer.score = Math.round(otherPlayer.score * 100) / 100;
-                
+
                 addToHistory(
                     `${player.name}: ${amount >= 0 ? '+' : ''}${amount} (369 vs ${otherPlayer.name})`,
                     amount,
@@ -752,17 +831,17 @@ function applyScoreChange(playerId, amount, opponentId) {
             // Tất cả đền: Người chơi chỉ nhận điểm từ người đền (KHÔNG nhận điểm từ bi)
             const opponents = players.filter(p => p.id !== playerId);
             const totalFromOpponents = amount * opponents.length; // Tổng điểm từ tất cả người đền
-            
+
             // Người chơi chỉ nhận điểm từ người đền (không cộng điểm bi)
             player.score += totalFromOpponents;
             player.score = Math.round(player.score * 100) / 100;
-            
+
             // Mỗi người khác trừ điểm
             opponents.forEach(p => {
                 p.score -= amount;
                 p.score = Math.round(p.score * 100) / 100;
             });
-            
+
             addToHistory(
                 `${player.name}: +${totalFromOpponents} (369 vs Tất cả - mỗi người đền ${amount} điểm)`,
                 totalFromOpponents,
@@ -775,10 +854,10 @@ function applyScoreChange(playerId, amount, opponentId) {
                 player.score += amount;
                 opponent.score -= amount;
                 opponent.score = Math.round(opponent.score * 100) / 100;
-                
+
                 // Save as last opponent
                 lastOpponentId[playerId] = opponentId;
-                
+
                 addToHistory(
                     `${player.name}: ${amount >= 0 ? '+' : ''}${amount} (369 vs ${opponent.name})`,
                     amount,
@@ -794,9 +873,9 @@ function applyScoreChange(playerId, amount, opponentId) {
             amount
         );
     }
-    
+
     player.score = Math.round(player.score * 100) / 100;
-    
+
     saveCurrentGame();
     renderPlayers();
     updateLeaderDisplay();
@@ -864,20 +943,20 @@ function openScoreModal(playerId) {
 
     document.getElementById('modal-player-name').textContent = `Cộng điểm: ${player.name}`;
     document.getElementById('score-input').value = '';
-    
+
     // Show opponent selection for 369 mode with 3+ players
     const opponentContainer = document.getElementById('opponent-select-container');
     const opponentList = document.getElementById('opponent-select-list');
-    
+
     if (mode369 && players.length > 2) {
         // Show opponent selection
         opponentContainer.classList.remove('hidden');
         opponentList.innerHTML = '';
-        
+
         // Get list of opponents
         const opponents = players.filter(p => p.id !== playerId);
         let firstOpponent = null;
-        
+
         opponents.forEach((p, index) => {
             const btn = document.createElement('button');
             btn.className = 'opponent-select-btn';
@@ -886,7 +965,7 @@ function openScoreModal(playerId) {
                 <div class="opponent-select-avatar" style="background: ${p.color}">${p.avatar || p.name.charAt(0).toUpperCase()}</div>
                 <span>${p.name}</span>
             `;
-            
+
             // Auto-select if this is the last opponent for this player, or select first if none selected
             if (lastOpponentId[playerId] === p.id) {
                 btn.classList.add('selected');
@@ -894,7 +973,7 @@ function openScoreModal(playerId) {
             } else if (index === 0) {
                 firstOpponent = p;
             }
-            
+
             btn.onclick = () => {
                 document.querySelectorAll('.opponent-select-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
@@ -904,7 +983,7 @@ function openScoreModal(playerId) {
             };
             opponentList.appendChild(btn);
         });
-        
+
         // If no opponent was selected (no lastOpponentId), auto-select the first one
         if (!selectedOpponentId && firstOpponent) {
             const firstBtn = opponentList.querySelector(`[data-player-id="${firstOpponent.id}"]`);
@@ -914,7 +993,7 @@ function openScoreModal(playerId) {
                 lastOpponentId[playerId] = firstOpponent.id;
             }
         }
-        
+
         // Refresh icons after adding buttons
         refreshIcons();
     } else {
@@ -928,7 +1007,7 @@ function openScoreModal(playerId) {
             }
         }
     }
-    
+
     document.getElementById('score-modal').classList.remove('hidden');
     document.getElementById('score-input').focus();
 }
@@ -972,7 +1051,7 @@ function submitScore(action) {
                 player.score += value;
                 otherPlayer.score -= value;
                 otherPlayer.score = Math.round(otherPlayer.score * 100) / 100;
-                
+
                 addToHistory(
                     `${player.name}: ${value >= 0 ? '+' : ''}${value} (369 vs ${otherPlayer.name})`,
                     value,
@@ -985,16 +1064,16 @@ function submitScore(action) {
                 showToast('Vui lòng chọn người đền!', 'warning');
                 return;
             }
-            
+
             const opponent = players.find(p => p.id === selectedOpponentId);
             if (opponent) {
                 player.score += value;
                 opponent.score -= value;
                 opponent.score = Math.round(opponent.score * 100) / 100;
-                
+
                 // Save as last opponent for this player
                 lastOpponentId[currentPlayerId] = selectedOpponentId;
-                
+
                 addToHistory(
                     `${player.name}: ${value >= 0 ? '+' : ''}${value} (369 vs ${opponent.name})`,
                     value,

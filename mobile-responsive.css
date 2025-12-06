@@ -1,0 +1,86 @@
+/* ==================== RESPONSIVE MOBILE ==================== */
+@media (max-width: 480px) {
+    .player-card {
+        padding: 10px 14px !important;
+        min-height: 75px !important;
+    }
+
+    .player-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 18px !important;
+    }
+
+    .player-name {
+        font-size: 18px !important;
+        max-width: 140px !important;
+    }
+
+    .player-score-large {
+        font-size: 36px !important;
+        min-width: 60px !important;
+    }
+
+    .billiard-ball {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
+    }
+
+    .billiard-balls-container {
+        gap: 6px !important;
+    }
+
+    /* Scale down even more for 4+ players on small screens */
+    .players-list:has(.player-card-wrapper:nth-child(4)) .player-card {
+        padding: 8px 12px !important;
+        min-height: 68px !important;
+    }
+
+    .players-list:has(.player-card-wrapper:nth-child(4)) .player-avatar {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 16px !important;
+    }
+
+    .players-list:has(.player-card-wrapper:nth-child(4)) .player-name {
+        font-size: 16px !important;
+    }
+
+    .players-list:has(.player-card-wrapper:nth-child(4)) .player-score-large {
+        font-size: 30px !important;
+    }
+
+    .players-list:has(.player-card-wrapper:nth-child(4)) .billiard-ball {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+    }
+
+    .players-section {
+        padding: 8px !important;
+    }
+
+    .players-list {
+        gap: 6px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .player-score-large {
+        font-size: 32px !important;
+    }
+
+    .billiard-ball {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+
+    .player-card {
+        padding: 8px 12px !important;
+    }
+}
