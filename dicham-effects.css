@@ -79,6 +79,13 @@
     pointer-events: none;
     z-index: 2000;
     animation: epic-rise 3s ease-out forwards;
+
+    /* Avoid overflow */
+    max-width: 90vw;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.2;
 }
 
 @keyframes epic-rise {

@@ -1211,3 +1211,126 @@ document.addEventListener('keydown', (e) => {
         closeWinnerModal();
     }
 });
+
+// ==================== SCORE MODAL FUNCTIONS ====================
+function openScoreModal(playerId) {
+    currentPlayerId = playerId;
+    const player = players.find(p => p.id === playerId);
+    if (!player) return;
+
+    document.getElementById('modal-player-name').textContent = `Cộng điểm: ${player.name}`;
+    document.getElementById('score-input').value = '';
+    document.getElementById('score-input').focus();
+
+    // Update "Tất cả đền" multiplier display
+    const otherPlayersCount = players.length - 1;
+    const multiplierEl = document.getElementById('formula-all-multiplier');
+    if (multiplierEl) {
+        multiplierEl.textContent = `x${otherPlayersCount}`;
+    }
+
+    // Show/hide opponent selector for mode 369
+    const opponentContainer = document.getElementById('opponent-select-container');
+    if (mode369 && players.length > 2) {
+        opponentContainer.classList.remove('hidden');
+        renderOpponentSelect(playerId);
+    } else {
+        opponentContainer.classList.add('hidden');
+    }
+
+    document.getElementById('score-modal').classList.remove('hidden');
+}
+
+function closeScoreModal() {
+    document.getElementById('score-modal').classList.add('hidden');
+    currentPlayerId = null;
+    selectedOpponentId = null;
+}
+
+function quickScore(amount) {
+    const input = document.getElementById('score-input');
+    const currentValue = parseInt(input.value) || 0;
+    input.value = currentValue + amount;
+}
+
+function applyFormula(formulaType, multiplier) {
+    const input = document.getElementById('score-input');
+    const currentValue = parseInt(input.value) || 0;
+
+    if (formulaType === 'mamden') {
+        // Mâm đền: Nhân điểm hiện tại với multiplier
+        input.value = currentValue * multiplier;
+    }
+
+    // Visual feedback
+    input.style.borderColor = 'var(--primary)';
+    setTimeout(() => {
+        input.style.borderColor = 'transparent';
+    }, 300);
+}
+
+function applyAllFormula() {
+    const input = document.getElementById('score-input');
+    const currentValue = parseInt(input.value) || 0;
+
+    // Tất cả đền: Nhân với số người chơi khác (trừ người được cộng)
+    const otherPlayersCount = players.length - 1;
+    input.value = currentValue * otherPlayersCount;
+
+    // Visual feedback with warning color
+    input.style.borderColor = 'var(--warning)';
+    setTimeout(() => {
+        input.style.borderColor = 'transparent';
+    }, 300);
+
+    // Show toast with info
+    showToast(`Điểm x${otherPlayersCount} (${otherPlayersCount} người đền)`, 'info', 2000);
+}
+
+function renderOpponentSelect(playerId) {
+    const container = document.getElementById('opponent-select-list');
+    const opponents = players.filter(p => p.id !== playerId);
+
+    container.innerHTML = opponents.map(p => `
+        <button class="opponent-select-btn ${selectedOpponentId === p.id ? 'selected' : ''}" onclick="selectOpponent(${p.id})">
+            <div class="opponent-avatar" style="background: ${p.color}">${p.avatar || p.name.charAt(0).toUpperCase()}</div>
+            <span>${p.name}</span>
+        </button>
+    `).join('');
+}
+
+function selectOpponent(opponentId) {
+    selectedOpponentId = opponentId;
+    renderOpponentSelect(currentPlayerId);
+}
+
+function selectAllOpponents() {
+    // Set selectedOpponentId to 'all' to indicate all opponents
+    selectedOpponentId = 'all';
+    // Clear all individual selections visually
+    const container = document.getElementById('opponent-select-list');
+    const buttons = container.querySelectorAll('.opponent-select-btn');
+    buttons.forEach(btn => btn.classList.remove('selected'));
+
+    // Visual feedback
+    showToast('Tất cả đều đền!', 'info', 1500);
+}
+
+function submitScore(action) {
+    const scoreValue = parseInt(document.getElementById('score-input').value);
+    if (isNaN(scoreValue) || scoreValue === 0) {
+        showToast('Vui lòng nhập điểm', 'warning');
+        return;
+    }
+
+    const amount = action === 'subtract' ? -scoreValue : scoreValue;
+
+    // Check mode 369 with 3+ players
+    if (mode369 && players.length > 2 && !selectedOpponentId) {
+        showToast('Vui lòng chọn người đền', 'warning');
+        return;
+    }
+
+    applyScoreChange(currentPlayerId, amount, selectedOpponentId || (mode369 && players.length === 2 ? 'auto' : null));
+    closeScoreModal();
+}

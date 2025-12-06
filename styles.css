@@ -1072,6 +1072,91 @@ body {
     color: var(--text-secondary);
 }
 
+/* Score Formulas */
+.score-formulas {
+    margin-bottom: 16px;
+}
+
+.formula-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.formula-label [data-lucide] {
+    width: 14px;
+    height: 14px;
+}
+
+.formula-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.formula-btn {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, #1a232d 100%);
+    border: 2px solid rgba(78, 205, 196, 0.2);
+    padding: 10px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.formula-btn:hover {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+.formula-btn:hover .formula-name,
+.formula-btn:hover .formula-calc {
+    color: var(--text-dark);
+}
+
+.formula-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.formula-calc {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    transition: color 0.2s;
+}
+
+/* Tất cả đền button - special styling */
+.formula-btn-all {
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.2) 0%, rgba(230, 126, 34, 0.2) 100%);
+    border-color: rgba(243, 156, 18, 0.4);
+}
+
+.formula-btn-all:hover {
+    background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+    border-color: var(--warning);
+}
+
+.formula-btn-all .formula-calc {
+    color: var(--warning);
+}
+
+
+
 .quick-scores {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1172,6 +1257,39 @@ body {
     flex-shrink: 0;
     border: 2px solid rgba(255, 255, 255, 0.3);
 }
+
+/* Opponent All Button */
+.opponent-all-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    margin-top: 12px;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.2) 0%, rgba(230, 126, 34, 0.2) 100%);
+    border: 2px solid rgba(243, 156, 18, 0.4);
+    border-radius: 12px;
+    color: var(--warning);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.opponent-all-btn:hover {
+    background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+    border-color: var(--warning);
+    color: var(--text-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+}
+
+.opponent-all-btn [data-lucide] {
+    width: 18px;
+    height: 18px;
+}
+
 
 .opponent-select-btn.selected .opponent-select-avatar {
     border-color: var(--text-dark);

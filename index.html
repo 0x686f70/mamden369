@@ -206,6 +206,25 @@
                 </div>
                 <div class="score-input-container">
                     <input type="number" id="score-input" placeholder="Nhập điểm" inputmode="numeric">
+                    <div class="score-formulas">
+                        <label class="formula-label">
+                            <i data-lucide="calculator"></i> Công thức
+                        </label>
+                        <div class="formula-buttons">
+                            <button class="formula-btn" onclick="applyFormula('mamden', 2)">
+                                <span class="formula-name">Mâm đền</span>
+                                <span class="formula-calc">x2</span>
+                            </button>
+                            <button class="formula-btn" onclick="applyFormula('mamden', 3)">
+                                <span class="formula-name">Mâm đền</span>
+                                <span class="formula-calc">x3</span>
+                            </button>
+                            <button class="formula-btn" onclick="applyFormula('mamden', 4)">
+                                <span class="formula-name">Mâm đền</span>
+                                <span class="formula-calc">x4</span>
+                            </button>
+                        </div>
+                    </div>
                     <div class="quick-scores">
                         <button onclick="quickScore(-50)">-50</button>
                         <button onclick="quickScore(-10)">-10</button>
@@ -218,6 +237,10 @@
                         <i data-lucide="target"></i> Chọn người đền (369)
                     </label>
                     <div id="opponent-select-list" class="opponent-select-list"></div>
+                    <button class="opponent-all-btn" onclick="selectAllOpponents()">
+                        <i data-lucide="users"></i>
+                        <span>Tất cả đền</span>
+                    </button>
                 </div>
                 <div class="modal-actions">
                     <button class="btn-subtract" onclick="submitScore('subtract')">
