@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MamDen">
+    <meta name="theme-color" content="#2d3a4a">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="manifest" href="manifest.json">
+    <title>MamDen</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen">
+            <div class="home-content">
+                <div class="home-logo">
+                    <div class="logo-icon-container">
+                        <i data-lucide="gamepad-2" class="logo-lucide"></i>
+                    </div>
+                    <h1 class="logo-title">MamDen</h1>
+                    <p class="logo-subtitle">Ứng dụng tiêu diệt nhau thông minh</p>
+                </div>
+
+                <div class="home-actions">
+                    <button class="home-btn home-btn-primary" onclick="startNewGame()">
+                        <i data-lucide="plus-circle"></i>
+                        <span class="btn-text">Thêm mới Game</span>
+                    </button>
+                    <button class="home-btn home-btn-secondary" onclick="continueGame()" id="continue-btn">
+                        <i data-lucide="play-circle"></i>
+                        <span class="btn-text">Tiếp tục Game</span>
+                    </button>
+                </div>
+
+                <div class="home-saved-games" id="saved-games-section">
+                    <h3>Game đã lưu</h3>
+                    <div id="saved-games-list" class="saved-games-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <header class="game-header">
+                <div class="header-left">
+                    <button class="icon-btn" onclick="showGameList()" title="Danh sách game">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <button class="icon-btn" onclick="addPlayer()" title="Thêm người chơi">
+                        <i data-lucide="user-plus"></i>
+                    </button>
+                    <button class="icon-btn" onclick="resetAllScores()" title="Reset điểm">
+                        <i data-lucide="rotate-ccw"></i>
+                    </button>
+                    <button class="icon-btn" onclick="shareGame()" title="Chia sẻ">
+                        <i data-lucide="share-2"></i>
+                    </button>
+                    <button class="icon-btn" onclick="openSettings()" title="Cài đặt">
+                        <i data-lucide="info"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <i data-lucide="trophy" class="trophy-icon"></i>
+                    <div class="leader-info" id="leader-info">
+                        <div class="leader-avatar" id="leader-avatar"></div>
+                        <span class="leader-name" id="leader-name">--</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="win-condition" id="win-condition">
+                <i data-lucide="crown" class="crown-icon"></i>
+                <span id="win-text"></span>
+            </div>
+
+            <section class="players-section">
+                <div id="players-list" class="players-list"></div>
+            </section>
+
+            <nav class="bottom-nav">
+                <button class="nav-btn active" onclick="showHome()">
+                    <i data-lucide="home"></i>
+                </button>
+                <button class="nav-btn" onclick="openSettings()">
+                    <i data-lucide="more-horizontal"></i>
+                </button>
+            </nav>
+        </div>
+
+        <!-- New Game Modal -->
+        <div id="new-game-modal" class="modal hidden">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3><i data-lucide="gamepad-2" class="modal-icon"></i> Tạo Game Mới</h3>
+                    <button class="close-btn" onclick="closeNewGameModal()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="new-game-form">
+                    <div class="form-group" style="display: none;">
+                        <label>Tên Game</label>
+                        <input type="text" id="game-name-input" value="MamDen" maxlength="30">
+                    </div>
+                    <div class="form-group">
+                        <label>Điểm để thắng</label>
+                        <div class="win-options">
+                            <button class="win-option active" data-points="50">50 điểm</button>
+                            <button class="win-option" data-points="100">100 điểm</button>
+                            <button class="win-option" data-points="200">200 điểm</button>
+                            <button class="win-option" data-points="0">Không giới hạn</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Thêm người chơi</label>
+                        <div class="players-input-list" id="players-input-list">
+                            <div class="player-input-item">
+                                <input type="text" placeholder="Tên người chơi 1" class="player-name-field"
+                                    maxlength="20">
+                                <button class="remove-player-input" onclick="removePlayerInput(this)">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+                            <div class="player-input-item">
+                                <input type="text" placeholder="Tên người chơi 2" class="player-name-field"
+                                    maxlength="20">
+                                <button class="remove-player-input" onclick="removePlayerInput(this)">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="add-player-input-btn" onclick="addPlayerInput()">
+                            <i data-lucide="plus"></i> Thêm người chơi
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeNewGameModal()">Hủy</button>
+                    <button class="btn-confirm" onclick="confirmNewGame()">
+                        <i data-lucide="play"></i> Bắt đầu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Input Modal -->
+        <div id="score-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-player-name">Cộng điểm</h3>
+                    <button class="close-btn" onclick="closeScoreModal()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="score-input-container">
+                    <input type="number" id="score-input" placeholder="Nhập điểm" inputmode="numeric">
+                    <div class="quick-scores">
+                        <button onclick="quickScore(-50)">-50</button>
+                        <button onclick="quickScore(-10)">-10</button>
+                        <button onclick="quickScore(10)">+10</button>
+                        <button onclick="quickScore(50)">+50</button>
+                    </div>
+                </div>
+                <div id="opponent-select-container" class="opponent-select-container hidden">
+                    <label class="opponent-select-label">
+                        <i data-lucide="target"></i> Chọn người đền (369)
+                    </label>
+                    <div id="opponent-select-list" class="opponent-select-list"></div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-subtract" onclick="submitScore('subtract')">
+                        <i data-lucide="minus"></i> Trừ
+                    </button>
+                    <button class="btn-add" onclick="submitScore('add')">
+                        <i data-lucide="plus"></i> Cộng
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i data-lucide="settings" class="modal-icon"></i> Cài đặt</h3>
+                    <button class="close-btn" onclick="closeSettings()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="settings-list">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-name"><i data-lucide="target" class="setting-icon"></i> Mâm đền
+                                369</span>
+                            <span class="setting-desc">2 người: tự động đền. 3+ người: chọn người đền khi cộng điểm</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="mode-369" onchange="toggleMode369()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-name"><i data-lucide="trophy" class="setting-icon"></i> Điểm
+                                thắng</span>
+                            <span class="setting-desc" id="current-win-points">50 điểm</span>
+                        </div>
+                        <input type="number" id="win-points-input" class="win-points-input" value="50" min="0">
+                    </div>
+                    <div class="setting-item">
+                        <button class="btn-warning full-width" onclick="resetAllScores()">
+                            <i data-lucide="rotate-ccw"></i> Reset tất cả điểm
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <button class="btn-danger full-width" onclick="deleteCurrentGame()">
+                            <i data-lucide="trash-2"></i> Xóa game này
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Player Modal -->
+        <div id="add-player-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i data-lucide="user-plus" class="modal-icon"></i> Thêm người chơi</h3>
+                    <button class="close-btn" onclick="closeAddPlayerModal()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <input type="text" id="player-name-input" placeholder="Tên người chơi" maxlength="20">
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeAddPlayerModal()">Hủy</button>
+                    <button class="btn-confirm" onclick="confirmAddPlayer()">
+                        <i data-lucide="check"></i> Thêm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game List Modal -->
+        <div id="game-list-modal" class="modal hidden">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3><i data-lucide="list" class="modal-icon"></i> Danh sách Game</h3>
+                    <button class="close-btn" onclick="closeGameListModal()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div id="game-list-container" class="game-list-container"></div>
+            </div>
+        </div>
+
+        <!-- Winner Modal -->
+        <div id="winner-modal" class="modal hidden">
+            <div class="modal-content winner-content">
+                <div class="winner-celebration">
+                    <div class="winner-trophy">
+                        <i data-lucide="trophy" class="winner-trophy-icon"></i>
+                    </div>
+                    <h2 class="winner-title">Chúc mừng!</h2>
+                    <div class="winner-name" id="winner-name-display"></div>
+                    <p class="winner-subtitle">đã chiến thắng!</p>
+                </div>
+                <div class="modal-actions single">
+                    <button class="btn-confirm full-width" onclick="closeWinnerModal()">
+                        <i data-lucide="check"></i> Tiếp tục
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Confirm Modal -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-content confirm-modal-content">
+                <div class="confirm-icon" id="confirm-icon">
+                    <i data-lucide="alert-circle"></i>
+                </div>
+                <h3 class="confirm-title" id="confirm-title">Xác nhận</h3>
+                <p class="confirm-message" id="confirm-message">Bạn có chắc chắn?</p>
+                <div class="modal-actions">
+                    <button class="btn-cancel" id="confirm-cancel-btn">Hủy</button>
+                    <button class="btn-danger" id="confirm-ok-btn">
+                        <i data-lucide="check"></i> Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Mode Indicator -->
+        <div id="mode-indicator" class="mode-indicator hidden">
+            <i data-lucide="target"></i> Chế độ Mâm đền 369
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>
