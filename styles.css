@@ -372,31 +372,35 @@ body {
 }
 
 /* Player Card - New Design */
+.player-card-wrapper {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
 .player-card {
     background: var(--bg-card);
     border-radius: var(--border-radius-lg);
-    padding: 20px;
+    padding: 16px 20px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 12px;
     position: relative;
-    min-height: 130px;
+    min-height: 100px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s ease;
+    touch-action: pan-y;
+    z-index: 2;
 }
 
-.player-card:nth-child(even) {
+.player-card-wrapper:nth-child(even) .player-card {
     background: var(--bg-card-alt);
 }
 
-.player-card:active {
-    transform: scale(0.98);
-}
-
-.player-card-left {
+.player-card-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1;
 }
 
 .player-avatar {
@@ -415,36 +419,40 @@ body {
     flex-shrink: 0;
 }
 
-.player-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-}
-
 .player-name {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 600;
     color: var(--text-dark);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 60px;
+    max-width: 200px;
 }
 
-.player-score-inline {
-    font-size: 24px;
-    font-weight: 700;
+.player-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.player-score-large {
+    font-size: 48px;
+    font-weight: 800;
     color: var(--text-dark);
     line-height: 1;
     transition: opacity 0.2s;
+    text-align: center;
+    flex: 1;
+    min-width: 80px;
 }
 
-.player-score-inline:hover {
+.player-score-large:hover {
     opacity: 0.7;
 }
 
-.player-score-inline.negative {
+.player-score-large.negative {
     color: var(--danger);
 }
 
@@ -453,11 +461,16 @@ body {
     align-items: center;
     gap: 12px;
     padding: 8px;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
 }
 
 .billiard-ball {
     width: 50px;
     height: 50px;
+    min-width: 50px;
+    min-height: 50px;
     border-radius: 50%;
     border: none;
     display: flex;
@@ -466,12 +479,15 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+    z-index: 11;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
     overflow: hidden;
     padding: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .billiard-ball:hover {
@@ -480,7 +496,8 @@ body {
 }
 
 .billiard-ball:active {
-    transform: translateY(-1px) scale(0.98);
+    transform: translateY(-1px) scale(0.95);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .ball-number {
@@ -663,31 +680,61 @@ body {
     height: 18px;
 }
 
-.delete-player-btn {
+.player-card-menu {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--danger);
-    border: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    display: none;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-darker);
+    border-radius: var(--border-radius-lg);
+    z-index: 1;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.player-card-wrapper.menu-open .player-card-menu {
+    transform: translateX(0);
+}
+
+.menu-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+    gap: 6px;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 12px;
 }
 
-.delete-player-btn [data-lucide] {
-    width: 14px;
-    height: 14px;
+.menu-btn:first-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.player-card:hover .delete-player-btn,
-.player-card:active .delete-player-btn {
-    display: flex;
+.menu-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-btn.menu-edit {
+    color: var(--primary);
+}
+
+.menu-btn.menu-delete {
+    color: var(--danger);
+}
+
+.menu-btn [data-lucide] {
+    width: 24px;
+    height: 24px;
 }
 
 /* Bottom Navigation */
@@ -1418,7 +1465,8 @@ input:checked+.slider:before {
 }
 
 /* Input styling */
-#player-name-input {
+#player-name-input,
+#edit-player-name-input {
     width: 100%;
     background: var(--bg-darker);
     border: 2px solid transparent;
@@ -1426,15 +1474,18 @@ input:checked+.slider:before {
     padding: 14px 16px;
     font-size: 16px;
     color: white;
+    
     margin-bottom: 20px;
 }
 
-#player-name-input:focus {
+#player-name-input:focus,
+#edit-player-name-input:focus {
     outline: none;
     border-color: var(--primary);
 }
 
-#player-name-input::placeholder {
+#player-name-input::placeholder,
+#edit-player-name-input::placeholder {
     color: var(--text-secondary);
 }
 
@@ -1613,7 +1664,8 @@ input:checked+.slider:before {
 }
 
 /* Input styling */
-#player-name-input {
+#player-name-input,
+#edit-player-name-input {
     width: 100%;
     background: var(--bg-darker);
     border: 2px solid transparent;
@@ -1624,12 +1676,14 @@ input:checked+.slider:before {
     margin-bottom: 20px;
 }
 
-#player-name-input:focus {
+#player-name-input:focus,
+#edit-player-name-input:focus {
     outline: none;
     border-color: var(--primary);
 }
 
-#player-name-input::placeholder {
+#player-name-input::placeholder,
+#edit-player-name-input::placeholder {
     color: var(--text-secondary);
 }
 

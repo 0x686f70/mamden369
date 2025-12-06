@@ -200,7 +200,8 @@
                         <div class="setting-info">
                             <span class="setting-name"><i data-lucide="target" class="setting-icon"></i> Mâm đền
                                 369</span>
-                            <span class="setting-desc">2 người: tự động đền. 3+ người: chọn người đền khi cộng điểm</span>
+                            <span class="setting-desc">2 người: tự động đền. 3+ người: chọn người đền khi cộng
+                                điểm</span>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="mode-369" onchange="toggleMode369()">
@@ -243,6 +244,25 @@
                     <button class="btn-cancel" onclick="closeAddPlayerModal()">Hủy</button>
                     <button class="btn-confirm" onclick="confirmAddPlayer()">
                         <i data-lucide="check"></i> Thêm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Player Name Modal -->
+        <div id="edit-player-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i data-lucide="edit-2" class="modal-icon"></i> Đổi tên</h3>
+                    <button class="close-btn" onclick="closeEditPlayerModal()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <input type="text" id="edit-player-name-input" placeholder="Tên người chơi" maxlength="20">
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeEditPlayerModal()">Hủy</button>
+                    <button class="btn-confirm" onclick="confirmEditPlayerName()">
+                        <i data-lucide="check"></i> Lưu
                     </button>
                 </div>
             </div>

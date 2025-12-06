@@ -8,6 +8,7 @@ let winPoints = 100;
 let currentPlayerId = null;
 let selectedOpponentId = null; // For 369 mode with 3+ players
 let lastOpponentId = {}; // Store last opponent for each player (for quick adjust)
+let editingPlayerId = null; // For editing player name
 
 // Avatar colors
 const avatarColors = [
@@ -459,8 +460,13 @@ function confirmAddPlayer() {
 }
 
 function deletePlayer(id, event) {
-    event.stopPropagation();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    closePlayerMenu();
     const player = players.find(p => p.id === id);
+    if (!player) return;
     showConfirm('Xóa người chơi', `Bạn có chắc muốn xóa "${player.name}"?`, () => {
         players = players.filter(p => p.id !== id);
         saveCurrentGame();
@@ -470,6 +476,127 @@ function deletePlayer(id, event) {
         showToast(`Đã xóa ${player.name}`, 'success');
     }, 'danger');
 }
+
+function editPlayerName(id) {
+    closePlayerMenu();
+    const player = players.find(p => p.id === id);
+    if (!player) return;
+    
+    editingPlayerId = id;
+    document.getElementById('edit-player-name-input').value = player.name;
+    document.getElementById('edit-player-modal').classList.remove('hidden');
+    document.getElementById('edit-player-name-input').focus();
+    document.getElementById('edit-player-name-input').select();
+}
+
+function closeEditPlayerModal() {
+    document.getElementById('edit-player-modal').classList.add('hidden');
+    editingPlayerId = null;
+}
+
+function confirmEditPlayerName() {
+    const newName = document.getElementById('edit-player-name-input').value.trim();
+    if (!newName) {
+        showToast('Vui lòng nhập tên người chơi', 'warning');
+        return;
+    }
+    
+    const player = players.find(p => p.id === editingPlayerId);
+    if (!player) return;
+    
+    if (newName === player.name) {
+        closeEditPlayerModal();
+        return;
+    }
+    
+    const oldName = player.name;
+    player.name = newName;
+    saveCurrentGame();
+    renderPlayers();
+    updateLeaderDisplay();
+    addToHistory(`Đổi tên: ${oldName} → ${player.name}`, 0);
+    showToast(`Đã đổi tên thành ${player.name}`, 'success');
+    closeEditPlayerModal();
+}
+
+function setupSwipeGestures() {
+    const cards = document.querySelectorAll('.player-card-wrapper');
+    cards.forEach(wrapper => {
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        const card = wrapper.querySelector('.player-card');
+        const menu = wrapper.querySelector('.player-card-menu');
+        
+        const handleStart = (e) => {
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            isDragging = true;
+            card.style.transition = 'none';
+        };
+        
+        const handleMove = (e) => {
+            if (!isDragging) return;
+            const touch = e.touches ? e.touches[0] : e;
+            currentX = touch.clientX - startX;
+            
+            // Chỉ cho phép swipe sang trái (giá trị âm)
+            if (currentX < 0) {
+                card.style.transform = `translateX(${currentX}px)`;
+            }
+        };
+        
+        const handleEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.style.transition = 'transform 0.3s ease';
+            
+            // Nếu swipe quá 80px sang trái, mở menu
+            if (currentX < -80) {
+                card.style.transform = 'translateX(-120px)';
+                wrapper.classList.add('menu-open');
+            } else {
+                // Nếu không đủ, đóng menu
+                card.style.transform = 'translateX(0)';
+                wrapper.classList.remove('menu-open');
+            }
+            currentX = 0;
+        };
+        
+        // Touch events
+        card.addEventListener('touchstart', handleStart, { passive: true });
+        card.addEventListener('touchmove', handleMove, { passive: true });
+        card.addEventListener('touchend', handleEnd);
+        
+        // Mouse events for desktop testing
+        card.addEventListener('mousedown', handleStart);
+        card.addEventListener('mousemove', handleMove);
+        card.addEventListener('mouseup', handleEnd);
+        card.addEventListener('mouseleave', handleEnd);
+    });
+}
+
+function closePlayerMenu() {
+    document.querySelectorAll('.player-card-wrapper').forEach(wrapper => {
+        const card = wrapper.querySelector('.player-card');
+        wrapper.classList.remove('menu-open');
+        card.style.transform = 'translateX(0)';
+    });
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.player-card-wrapper') && !e.target.closest('.player-card-menu')) {
+        closePlayerMenu();
+    }
+});
+
+// Prevent swipe when clicking on billiard balls
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.billiard-ball') || e.target.closest('.billiard-balls-container')) {
+        e.stopPropagation();
+    }
+});
 
 function renderPlayers() {
     const container = document.getElementById('players-list');
@@ -490,28 +617,43 @@ function renderPlayers() {
         const scoreDisplay = player.score >= 0 ? player.score : player.score;
 
         return `
-            <div class="player-card">
-                <div class="player-card-left">
-                    <div class="player-avatar" style="background: ${player.color}">${player.avatar || player.name.charAt(0).toUpperCase()}</div>
-                    <div class="player-info">
+            <div class="player-card-wrapper" data-player-id="${player.id}">
+                <div class="player-card" data-player-id="${player.id}">
+                    <div class="player-card-header">
+                        <div class="player-avatar" style="background: ${player.color}">${player.avatar || player.name.charAt(0).toUpperCase()}</div>
                         <span class="player-name">${player.name}</span>
-                        <span class="player-score-inline ${player.score < 0 ? 'negative' : ''}" onclick="openScoreModal(${player.id})" style="cursor: pointer;">${scoreDisplay}</span>
+                    </div>
+                    <div class="player-card-bottom">
+                        <span class="player-score-large ${player.score < 0 ? 'negative' : ''}" onclick="openScoreModal(${player.id})" style="cursor: pointer;">${scoreDisplay}</span>
+                        <div class="billiard-balls-container" onclick="event.stopPropagation();">
+                            <button class="billiard-ball ball-3" onclick="billiardBallClick(${player.id}, 1, event)" title="1 điểm" type="button"></button>
+                            <button class="billiard-ball ball-6" onclick="billiardBallClick(${player.id}, 2, event)" title="2 điểm" type="button"></button>
+                            <button class="billiard-ball ball-9" onclick="billiardBallClick(${player.id}, 3, event)" title="3 điểm" type="button"></button>
+                        </div>
                     </div>
                 </div>
-                <div class="billiard-balls-container">
-                    <button class="billiard-ball ball-3" onclick="billiardBallClick(${player.id}, 1, event)" title="1 điểm"></button>
-                    <button class="billiard-ball ball-6" onclick="billiardBallClick(${player.id}, 2, event)" title="2 điểm"></button>
-                    <button class="billiard-ball ball-9" onclick="billiardBallClick(${player.id}, 3, event)" title="3 điểm"></button>
+                <div class="player-card-menu">
+                    <button class="menu-btn menu-edit" onclick="editPlayerName(${player.id})">
+                        <i data-lucide="edit-2"></i>
+                        <span>Đổi tên</span>
+                    </button>
+                    <button class="menu-btn menu-delete" onclick="deletePlayer(${player.id}, event)">
+                        <i data-lucide="trash-2"></i>
+                        <span>Xóa</span>
+                    </button>
                 </div>
-                <button class="delete-player-btn" onclick="deletePlayer(${player.id}, event)"><i data-lucide="x"></i></button>
             </div>
         `;
     }).join('');
     refreshIcons();
+    setupSwipeGestures();
 }
 
 function billiardBallClick(playerId, points, event) {
-    event.stopPropagation();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
     
     // If mode 369 with 3+ players, show quick opponent selector
     if (mode369 && players.length > 2) {
@@ -973,6 +1115,8 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         if (!document.getElementById('add-player-modal').classList.contains('hidden')) {
             confirmAddPlayer();
+        } else if (!document.getElementById('edit-player-modal').classList.contains('hidden')) {
+            confirmEditPlayerName();
         } else if (!document.getElementById('score-modal').classList.contains('hidden')) {
             submitScore('add');
         } else if (!document.getElementById('new-game-modal').classList.contains('hidden')) {
@@ -981,6 +1125,7 @@ document.addEventListener('keydown', (e) => {
     }
     if (e.key === 'Escape') {
         closeAddPlayerModal();
+        closeEditPlayerModal();
         closeScoreModal();
         closeSettings();
         closeNewGameModal();
